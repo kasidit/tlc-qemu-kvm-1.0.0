@@ -1,0 +1,29 @@
+            A note on tlc implementation on kvm 1.0
+           =========================================
+
+Changes made to the original source code are listed here.
+
+migration.c
+
+1. We include the "tlc-debug" header to this file. 
+2. IN migrate_fd_put_ready, at the last part when qssc finishes sucessfully,
+we don't set the migrate state to MIG_STATE_COMPLETE right away because 
+the thread is still working and bufferd_put_buffer will perform incorrectly
+because it expect the state to be MIG_STATE_ACTIVE. So, we delay setting 
+the state to MIG_STATE_COMPLETE when the cpkpt_thread is about to end. 
+The vm_start() must be set though. 
+3. migrate_fd_put_notify() is not used because the file to write the 
+state info to during the migration is openned with blocking flag.  
+The non-blocking setting in the original version doesn't work with tlc
+because whenever file writing stall the checkpoint thread will leave 
+a callback event for the io-thread to perform (see qemu io handler). 
+It will overload the io-thread and interfere with normal io activities. 
+
+buffered_file.c
+
+1. The bufferd_rate_tick_m function is used instead of brt. It calls
+tlc_handle_dirty_ram(), which call cpu_phy_sync_bitmap() to mark 
+dirty flags on dirty pages. It also manipulate the have_dirty and 
+no_dirty variables in collaboration with page_saver_t thread.
+
+

@@ -1,0 +1,85 @@
+Jan 22, 12: 
+The version tlc-kvm-1.0.13 combines TLC with libmemcached. 
+
+The following changes to the original TLC were made: 
+
+--> adding -lmemcached in the config-host.mak file
+
+config-host.mak:100:LDFLAGS=-Wl,--warn-common -Wl,-z,relro -Wl,-z,now -pie -m64 -g -lmemcached
+config-host.mak:103:LIBS+=-lrt -pthread -pthread -lgthread-2.0 -lrt -lglib-2.0 -lmemcached  
+
+--> We sucesssfully write data to a file /tmp/s2... if the memcache memory 
+is full and TLC cannot SET data to it anymore. The functions put_page_to_hash() 
+and hash_save_block() have been changed.  
+
+--> Data in s2.2 is set to memcached or file and TLC 
+writes data frame during s4 to the checkpoint file.  
+
+--> We modify the read operations to read data from memcached and tmp file.
+
+--> We successfully write files and read data back to memory on VM recovery. 
+
+As shown in the list below, the s2.2 file can be very big. So, it may be better 
+to leave the s2.2 dirty pages to s3 (like in 1.0.11). We have to modify the 
+recovery mechanism to read data from memcached though.   
+
+total 2173020
+drwxrwxr-x  2 kani kani       4096 2012-01-20 16:19 Courses
+drwxrwxr-x  2 kani kani       4096 2012-01-20 16:17 Departmental
+drwxrwxr-x  3 kani kani       4096 2012-01-24 13:57 kc
+drwxrwxr-x  2 kani kani       4096 2012-01-20 16:18 music2
+drwxrwxr-x  3 kani kani       4096 2012-01-20 16:17 papers
+-rw-rw-r--  1 kani kani     439844 2012-01-17 14:29 Redis_Cluster.pdf
+drwxrwxr-x 23 kani kani       4096 2012-01-22 23:07 Research
+-rw-rw-r--  1 kani kani       8073 2012-01-19 13:44 sushicloud.jpg
+-rw-r--r--  1 kani kani 2224691508 2012-01-24 18:31 tlc_vm_state_s2
+
+Jan 28, 12: 
+
+--> version 1.0.14 is set specifically for experiments. In case s2.2 
+does not work, it will report the error redering unsuccesful trial 
+but generate a working checkpoint. Similar mechanism will occur 
+during s3 where state will be sent to membase first and redirect to 
+tlc_vm_state_s3 file if unsuccessful.
+We havn't implement any yet. It will start this Sunday.     
+????
+
+--> What about using uthash/buffer and s4 rather than writing to file...
+This may be better than writing to file. We decide to do it on this 
+1.0.14 version.  
+
+Feb 2, 12: 
+
+--> Done with version 1.0.14. The s2.2 (PS) can now save data to membase 
+server and store to hash table if the membase server is not available.  
+The data can change saving from remote to local and from local back to 
+remote if they become available. (note that the changing back is not 
+testedd yet 'cos membase doesn't change status, at least as we know now.)
+We now save it to tlc-kvm-1.0.14. 
+
+Feb 3, 12: 
+
+--> We have made 1.0.15. This version write s3's data to membase. 
+
+--> It works as long as the key doesn't fill up membase servers' memory. 
+Otherwise, the memcached_set() will return with a PROTOCOL ERROR 
+and WRITE FAILURE status.
+
+--> If the failures still occur when s3 starts, libmemcached will report 
+a fatal error and abort the process. Since s3 creates multiple threads
+to write data to membase, multiple connections must be created. 
+
+Assertion "ptr->error_messages" failed for function "memcached_vdo" likely for "memcached_connect() returned an error but the memcached_server_write_instance_st showed none.", at libmemcached/do.cc:64
+
+Feb 7, 12: 
+
+--> We have fixed the concurrent setting problems by creating multiple 
+connections to the membase servers. And, yes, we have one memcached_st 
+struct for each thread to avoid the above problem. 
+
+--> The version 10.0.15 can write data to membase in parallel and if 
+membase is full, it write data to local memory. 
+
+--> Next, I will work on version 1.0.16, which make s2.1 write pages 
+to membase (with a different flag) (and if membase is full, write 
+to file as usual.)  

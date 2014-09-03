@@ -1,0 +1,77 @@
+		    // report progress and io cnt via VIC
+    		    int i;
+		    for(i = 0; i < smp_cpus; i++){
+	 		all_io_cnt += tlc_profile[i].total_io_cnt;
+	 		tlc_profile[i].total_io_cnt = 0; // reset all io counts
+		    }
+
+	            if(vic_flag){
+	                snprintf(progress_string, VIC_STR_LEN,"ct %d %" PRId64 " ", 
+				(int)(stage2_progress * 100.0), all_io_cnt);
+	                vic_report(progress_string);
+	            }
+
+		    if(!stepwise_slowdown){
+	    	    	trigger_slowdown = 0; // disable slowdown trigger
+
+	    		if(
+				(state_transfer_type == TLC_EXEC)||
+				(state_transfer_type == TLM_EXEC)
+	      		  ){
+				save_vcpu_affinity();
+	    		}
+
+			slowdown_cpu(slowdown_aggressiveness);
+		    }
+		    else{
+
+			if(stepwise_reduction_counter == 0){
+			    // calculate progress per reduction step unit
+			    slowdown_progress_unit = 
+				(1.0 - slowdown_marker)/
+				((double)(slowdown_aggressiveness));
+			    // change epoch interval (if different) 
+		    	    tlc_interval = tlc_slowdown_interval; 
+
+	    		    if(
+				(state_transfer_type == TLC_EXEC)||
+				(state_transfer_type == TLM_EXEC)
+	      		      ){
+				save_vcpu_affinity();
+	    		    }
+
+			}
+
+			stepwise_reduction_counter++;
+			// call slowdown
+			if(!slowdown_cpu(smp_cpus - stepwise_reduction_counter)){
+	    	    	    trigger_slowdown = 0; 
+			}
+
+			if(stepwise_reduction_counter < slowdown_aggressiveness){	
+			    // calculate next slowdown_marker
+			    slowdown_marker += slowdown_progress_unit;
+printf("slowUnit %.4lf at %.4lf next %.4lf\n", 
+	slowdown_progress_unit, stage2_progress, slowdown_marker);
+	            	    if(vic_flag){
+	                	snprintf(progress_string, VIC_STR_LEN,
+					"slowUnit %.4lf at %.4lf next %.4lf", 
+					slowdown_progress_unit, stage2_progress, slowdown_marker);
+	                	vic_report(progress_string);
+	            	    }
+			}
+			else{
+	    	    	    trigger_slowdown = 0; 
+			}
+
+		    }
+
+	        }
+		else{
+	            // VIC stuffs
+	            if(vic_flag){
+	                snprintf(progress_string, VIC_STR_LEN,"ct %d", (int)(stage2_progress * 100.0));
+	                vic_report(progress_string);
+	            }
+
+		}

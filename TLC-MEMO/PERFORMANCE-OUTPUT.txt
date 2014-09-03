@@ -1,0 +1,7 @@
+When the VM migrate, the source VM spits out messages to screen reporting migration progress information. Their format are as follow. 
+
+1. s221 duration_id pages_copied_last_epoch epoch_duration
+2. s222 pages_gen_last_epoch, mig_duration, all_io_cnt, stage2_progress)
+3. s2s3gap s2s3gapduration accumulate_page_saver_wait_time
+4. s3 last_addr_buffer, num_cp_threads
+5. s4 tlc_pages_sent_mserv, tlc_s21_pages_transferred, (vic_mig_thread_finish - mig_start)

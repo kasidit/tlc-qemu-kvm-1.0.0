@@ -1,0 +1,4 @@
+// timing                    
+memretrieve_end = qemu_get_clock_ms(rt_clock);
+printf("tlc_sync_ram: Elasped time retrieving pages from mem server = %" PRId64 " ms\n", 
+	    memretrieve_end - memretrieve_start);
