@@ -13,6 +13,17 @@
  *
  */
 
+/*
+ * Thread-based Live Migration (TLM) and Thread-based Live Checkpointing (TLC). 
+ *
+ * Copyright Kasidit Chanchio, Vasabilab. 2012
+ *
+ * Authors:
+ *  Kasidit Chanchio   <kasiditchanchio@gmail.com>
+ *
+ *
+ */
+
 #include "qemu-common.h"
 #include "qemu_socket.h"
 #include "migration.h"

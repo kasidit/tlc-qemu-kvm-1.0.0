@@ -1,7 +1,14 @@
-/*  This program is a part of TLC extensions to kvm.
-    Author: kasidit chanchio   
-    Copyright 2012
-*/
+/*
+ * Thread-based Live Migration (TLM) and Thread-based Live Checkpointing (TLC). 
+ *
+ * Copyright Kasidit Chanchio, Vasabilab. 2012
+ *
+ * Authors:
+ *  Kasidit Chanchio   <kasiditchanchio@gmail.com>
+ *
+ *
+ */
+
 #include <stdlib.h>
 #include <stdio.h>
 

@@ -1,7 +1,7 @@
 /*
- * TLC
+ * Thread-based Live Migration (TLM) and Thread-based Live Checkpointing (TLC). 
  *
- * Copyright Vasabilab. 2012
+ * Copyright Kasidit Chanchio, Vasabilab. 2012
  *
  * Authors:
  *  Kasidit Chanchio   <kasiditchanchio@gmail.com>

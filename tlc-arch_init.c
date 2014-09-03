@@ -1,3 +1,14 @@
+/*
+ * Thread-based Live Migration (TLM) and Thread-based Live Checkpointing (TLC). 
+ *
+ * Copyright Kasidit Chanchio, Vasabilab. 2012
+ *
+ * Authors:
+ *  Kasidit Chanchio   <kasiditchanchio@gmail.com>
+ *
+ *
+ */
+
 #include <stdint.h>
 #include <stdarg.h>
 #include <stdlib.h>
